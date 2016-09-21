@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "shrine/storage/linter"
+require "shrine/storage/rsync"
+
+Shrine::Storage::Linter.new(Shrine::Storage::Rsync.new).call
