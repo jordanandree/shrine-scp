@@ -3,8 +3,6 @@ require "ostruct"
 
 describe Shrine::Storage::Rsync do
   before do
-    @directory = File.join(FileUtils.pwd, "tmp/uploads")
-    @storage = Shrine::Storage::Rsync.new(directory: @directory, options: ["-q"])
     @io = FakeIO.new("file")
   end
 
@@ -16,6 +14,8 @@ describe Shrine::Storage::Rsync do
 
   describe "#upload" do
     before do
+      directory = File.join(FileUtils.pwd, "tmp/uploads")
+      @storage = Shrine::Storage::Rsync.new(directory: directory, options: ["-q"])
       @storage.upload @io, "foo"
     end
 
@@ -25,6 +25,19 @@ describe Shrine::Storage::Rsync do
 
     it "copies to remote directory" do
       assert File.exist?("./tmp/uploads/foo")
+    end
+  end
+
+  describe "#download" do
+    before do
+      directory = File.join(FileUtils.pwd, "tmp/downloads")
+      @storage = Shrine::Storage::Rsync.new(directory: directory, options: ["-q"])
+      @storage.upload @io, "foo"
+    end
+
+    it "downloads to tmp dir" do
+      @storage.download "foo"
+      assert File.exist?("./tmp/foo")
     end
   end
 end

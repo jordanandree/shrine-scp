@@ -2,6 +2,7 @@ require "shrine"
 
 require "fileutils"
 require "pathname"
+require "tempfile"
 
 class Shrine
   module Storage
@@ -42,10 +43,15 @@ class Shrine
 
       def upload(io, id, **)
         local_path = store_tmp(io, id)
-        rsync(local_path)
+        rsync_up(local_path)
       end
 
       def download(id)
+        rsync_down(id)
+
+        tempfile = Tempfile.new(["rsync", File.extname(id)], binmode: true)
+        tempfile.open
+        tempfile
       end
 
       def open(id)
@@ -68,8 +74,19 @@ class Shrine
 
       private
 
-        def rsync(local_file_path)
-          command = [rsync_bin, rsync_options, rsync_host, local_file_path].join(" ")
+        def rsync_up(local_file_path)
+          source = local_file_path
+          destination = rsync_host
+
+          command = [rsync_bin, rsync_options, source, destination].join(" ")
+          system(command)
+        end
+
+        def rsync_down(id)
+          source = File.join(rsync_host.chomp("/"), id)
+          destination = tmp_path(id)
+
+          command = [rsync_bin, rsync_options, source, destination].join(" ")
           system(command)
         end
 
@@ -88,13 +105,13 @@ class Shrine
         end
 
         def store_tmp(io, id)
-          path = tmp_path!(id)
+          path = tmp_path(id)
           IO.copy_stream(io, path)
           path
         end
 
         # Returns the tmp path to the file.
-        def tmp_path!(id)
+        def tmp_path(id)
           TMP_DIR.join(id.gsub("/", File::SEPARATOR))
         end
     end

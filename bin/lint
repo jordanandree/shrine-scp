@@ -4,4 +4,5 @@ require "bundler/setup"
 require "shrine/storage/linter"
 require "shrine/storage/rsync"
 
-Shrine::Storage::Linter.new(Shrine::Storage::Rsync.new).call
+storage = Shrine::Storage::Rsync.new(directory: "./tmp")
+Shrine::Storage::Linter.new(storage).call
