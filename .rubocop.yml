@@ -1,0 +1,56 @@
+AllCops:
+  TargetRubyVersion: 2.1
+  DisplayCopNames: true
+  DefaultFormatter: simple
+  Include:
+    - Rakefile
+  Exclude:
+    - test/test_helper.rb
+
+# Style
+Style/FileName:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/IndentationConsistency:
+  EnforcedStyle: rails
+
+Style/MultilineOperationIndentation:
+  EnforcedStyle: aligned
+
+Style/MultilineMethodCallIndentation:
+  EnforcedStyle: aligned
+
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%w': '[]'
+
+# can't enforce style to require
+# the trailing underscore -- so disabling for now
+Style/TrailingUnderscoreVariable:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+# Metrics
+Metrics/LineLength:
+  Max: 90
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/AbcSize:
+  Max: 20
+
+# Performance
+Performance/RedundantBlockCall:
+  Enabled: false

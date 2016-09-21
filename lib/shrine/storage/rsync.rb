@@ -54,7 +54,7 @@ class Shrine
       def exists?(id)
       end
 
-      def url(id, **options)
+      def url(id, **_options)
         id
       end
 

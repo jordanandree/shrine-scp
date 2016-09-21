@@ -20,11 +20,11 @@ describe Shrine::Storage::Rsync do
     end
 
     it "saves io to tmp path" do
-      assert File.exists?("./tmp/foo")
+      assert File.exist?("./tmp/foo")
     end
 
     it "copies to remote directory" do
-      assert File.exists?("./tmp/uploads/foo")
+      assert File.exist?("./tmp/uploads/foo")
     end
   end
 end
