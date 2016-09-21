@@ -1,5 +1,4 @@
 require "shrine"
-require "rsync"
 
 require "fileutils"
 require "pathname"
@@ -7,9 +6,12 @@ require "pathname"
 class Shrine
   module Storage
     class Rsync
-      TMP_DIR = Pathname.new(File.expand_path("../../../../tmp", __FILE__))
+      PWD     = Pathname.new(File.expand_path("../../../../", __FILE__)).freeze
+      TMP_DIR = PWD.join("tmp").freeze
 
-      def initialize(directory: nil, ssh_host: nil, host: nil, prefix: nil, args: [])
+      attr_reader :directory, :ssh_host, :host, :prefix, :options
+
+      def initialize(directory:, ssh_host: nil, host: nil, prefix: nil, options: [])
         # Initializes a storage for uploading via rsync.
         #
         # :directory
@@ -21,22 +23,26 @@ class Shrine
         # :host
         # :  URLs will by default be relative if `:prefix` is set, and you
         #    can use this option to set a CDN host (e.g. `//abc123.cloudfront.net`).
+        #
         # :prefix
         # :  The directory relative to `directory` to which files will be stored,
         #    and it is included in the URL.
+        #
+        # :options
+        # :  Additional arguments specific to rsync
+        #    https://linux.die.net/man/1/rsync
         @directory = directory
-        @prefix = prefix
-        @host = host
-        @ssh_host = ssh_host
-        @args = args
+        @prefix    = prefix
+        @host      = host
+        @ssh_host  = ssh_host
+        @options   = options
 
-        ::Rsync.configure do |c|
-          c.host = @ssh_host
-        end if @ssh_host
+        FileUtils.mkdir_p(TMP_DIR.to_s) unless TMP_DIR.exist?
       end
 
       def upload(io, id, **)
-        store_tmp(io, id)     
+        local_path = store_tmp(io, id)
+        rsync(local_path)
       end
 
       def download(id)
@@ -62,13 +68,33 @@ class Shrine
 
       private
 
+        def rsync(local_file_path)
+          command = [rsync_bin, rsync_options, rsync_host, local_file_path].join(" ")
+          system(command)
+        end
+
+        def rsync_host
+          ssh_host ? "#{ssh_host}:#{directory}" : directory
+        end
+
+        def rsync_bin
+          rsync_bin = `which rsync`.chomp
+          raise "rsync could not be found." if rsync_bin.empty?
+          rsync_bin
+        end
+
+        def rsync_options
+          options.join(" ")
+        end
+
         def store_tmp(io, id)
-          IO.copy_stream(io, tmp_path!(id))
+          path = tmp_path!(id)
+          IO.copy_stream(io, path)
+          path
         end
 
         # Returns the tmp path to the file.
         def tmp_path!(id)
-          FileUtils.mkdir_p(TMP_DIR.to_s) unless TMP_DIR.exist?
           TMP_DIR.join(id.gsub("/", File::SEPARATOR))
         end
     end

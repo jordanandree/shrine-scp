@@ -3,21 +3,28 @@ require "ostruct"
 
 describe Shrine::Storage::Rsync do
   before do
-    @whoami = `whoami`
-    @storage = Shrine::Storage::Rsync.new(ssh_host: "#{@whoami}@127.0.0.1")
+    @directory = File.join(FileUtils.pwd, "tmp/uploads")
+    @storage = Shrine::Storage::Rsync.new(directory: @directory, options: ["-q"])
     @io = FakeIO.new("file")
   end
 
   describe "#initialize" do
-    it "should configure :host" do
-      assert_equal ::Rsync.host, "#{@whoami}@127.0.0.1"
+    it "should make the tmp dir" do
+      assert File.directory?(Shrine::Storage::Rsync::TMP_DIR)
     end
   end
 
   describe "#upload" do
-    it "replaces the id with an URL" do
+    before do
       @storage.upload @io, "foo"
+    end
+
+    it "saves io to tmp path" do
       assert File.exists?("./tmp/foo")
+    end
+
+    it "copies to remote directory" do
+      assert File.exists?("./tmp/uploads/foo")
     end
   end
 end

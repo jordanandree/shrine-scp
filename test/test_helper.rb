@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "pry-byebug"
 
 require "minitest/autorun"
 require "minitest/pride"
