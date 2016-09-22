@@ -47,17 +47,20 @@ class Shrine
       end
 
       def download(id)
-        rsync_down(id)
+        io = rsync_down(id)
 
         tempfile = Tempfile.new(["rsync", File.extname(id)], binmode: true)
-        tempfile.open
+        IO.copy_stream(io, tempfile)
+        tempfile.tap(&:open)
         tempfile
       end
 
       def open(id)
+        # noop
       end
 
       def exists?(id)
+        # noop
       end
 
       def url(id, **_options)
@@ -75,17 +78,16 @@ class Shrine
       private
 
         def rsync_up(local_file_path)
-          source = local_file_path
-          destination = rsync_host
-
-          command = [rsync_bin, rsync_options, source, destination].join(" ")
-          system(command)
+          rsync_transfer(source: local_file_path, destination: rsync_host)
         end
 
         def rsync_down(id)
           source = File.join(rsync_host.chomp("/"), id)
-          destination = tmp_path(id)
 
+          tmp_path(id) if rsync_transfer(source: source, destination: tmp_path(id))
+        end
+
+        def rsync_transfer(source:, destination:)
           command = [rsync_bin, rsync_options, source, destination].join(" ")
           system(command)
         end
