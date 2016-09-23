@@ -1,7 +1,6 @@
 require "shrine"
 
 require "fileutils"
-require "pathname"
 require "tempfile"
 
 class Shrine
