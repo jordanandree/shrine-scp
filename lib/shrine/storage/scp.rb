@@ -67,7 +67,8 @@ class Shrine
       end
 
       def delete(id)
-        # noop
+        file_path = File.join(directory, id)
+        bash "rm -rf #{file_path} &> /dev/null;"
       end
 
       def clear!

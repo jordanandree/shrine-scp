@@ -74,6 +74,22 @@ describe Shrine::Storage::Scp do
     end
   end
 
+  describe "#delete" do
+    it "returns true when file is local" do
+      @storage = Shrine::Storage::Scp.new(directory: directory)
+      @storage.upload io, "hodor"
+      assert @storage.delete("hodor")
+      refute File.exist? "./tmp/hodor"
+    end
+
+    it "returns true when file is local" do
+      @storage = Shrine::Storage::Scp.new(directory: directory, ssh_host: ssh)
+      @storage.upload io, "gollum"
+      assert @storage.delete("gollum")
+      refute File.exist? "./tmp/gollum"
+    end
+  end
+
   describe "#url" do
     it "should return id with minimal config" do
       storage = Shrine::Storage::Scp.new(directory: directory)
