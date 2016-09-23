@@ -20,7 +20,31 @@ Or install it yourself as:
 
 ## Usage
 
-TODO
+```ruby
+require "shrine/storage/scp"
+
+Shrine.storages[:store] = Shrine::Storage::Scp.new(
+	directory: "/path/to/uploads" # Required argument
+)
+```
+
+### Optional Configuration
+
+**ssh_host:**  
+optional `user@hostname` for remote scp transfers
+
+**host:**  
+URLs will by default be relative if `:prefix` is set, and you can use this option to set a CDN host (e.g. `//abc123.cloudfront.net`).
+
+**prefix:**  
+The directory relative to `directory` to which files will be stored, and it is included in the URL.
+
+**options:**  
+Additional arguments specific to scp. See: [https://linux.die.net/man/1/scp](https://linux.die.net/man/1/scp)
+
+**permissions:**  
+bit pattern for permissions to set on uploaded files. i.e. group read permissions: `0644`
+
 
 ## Development
 
