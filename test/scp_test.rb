@@ -20,6 +20,13 @@ describe Shrine::Storage::Scp do
       @storage.upload io, "foo.txt"
       assert File.exist?("./tmp/uploads/foo.txt")
     end
+
+    it "should set custom permissions" do
+      @storage.instance_variable_set "@permissions", 0644
+      @storage.upload io, "foo.rtf"
+      stat = File.stat("./tmp/uploads/foo.rtf")
+      assert_equal format("%o", stat.mode), "100644"
+    end
   end
 
   describe "#download" do

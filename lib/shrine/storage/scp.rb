@@ -7,9 +7,9 @@ require "tempfile"
 class Shrine
   module Storage
     class Scp
-      attr_reader :directory, :ssh_host, :host, :prefix, :options
+      attr_reader :directory, :ssh_host, :host, :prefix, :options, :permissions
 
-      def initialize(directory:, ssh_host: nil, host: nil, prefix: nil, options: [])
+      def initialize(directory:, ssh_host: nil, host: nil, prefix: nil, options: [], permissions: 0600)
         # Initializes a storage for uploading via scp.
         #
         # :directory
@@ -29,11 +29,16 @@ class Shrine
         # :options
         # :  Additional arguments specific to scp
         #    https://linux.die.net/man/1/scp
-        @directory = directory.chomp(File::SEPARATOR)
-        @ssh_host  = ssh_host
-        @host      = host.chomp(File::SEPARATOR) if host
-        @prefix    = prefix.chomp(File::SEPARATOR) if prefix
-        @options   = options
+        #
+        # :permissions
+        # :  bit pattern for permissions to set on uploaded files
+        #
+        @directory   = directory.chomp(File::SEPARATOR)
+        @ssh_host    = ssh_host
+        @host        = host.chomp(File::SEPARATOR) if host
+        @prefix      = prefix.chomp(File::SEPARATOR) if prefix
+        @options     = options
+        @permissions = permissions
       end
 
       def upload(io, id, **)
@@ -70,6 +75,7 @@ class Shrine
       private
 
         def scp_up(id, tmp_path)
+          FileUtils.chmod(permissions, tmp_path)
           scp_transfer(source: tmp_path, destination: File.join(scp_host, id))
         end
 
