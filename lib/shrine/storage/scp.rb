@@ -66,12 +66,12 @@ class Shrine
       end
 
       def delete(id)
-        file_path = File.join(directory, id)
+        file_path = path(id)
         bash "rm -rf #{file_path}"
       end
 
       def clear!
-        file_path = File.join(directory, "*")
+        file_path = path("*")
         bash "rm -rf #{file_path}"
       end
 
@@ -89,11 +89,13 @@ class Shrine
 
         def scp_up(id, tmp_path)
           FileUtils.chmod(permissions, tmp_path)
-          scp_transfer(source: tmp_path, destination: File.join(scp_host, id))
+          destination = path(id)
+          destination = "#{ssh_host}:#{destination}" if ssh_host
+          scp_transfer(source: tmp_path, destination: destination)
         end
 
         def scp_down(id)
-          source = File.join(scp_host.chomp("/"), id)
+          source = path(id)
           tmp = tempfile!(id)
 
           tmp if scp_transfer(source: source, destination: tmp.path)
@@ -101,11 +103,7 @@ class Shrine
 
         def scp_transfer(source:, destination:)
           command = [scp_bin, scp_options, source, destination].join(" ")
-          system(command)
-        end
-
-        def scp_host
-          ssh_host ? "#{ssh_host}:#{directory}" : directory
+          system command
         end
 
         def scp_bin
@@ -116,6 +114,10 @@ class Shrine
 
         def scp_options
           options.join(" ")
+        end
+
+        def path(id)
+          File.join([directory, prefix, id].compact)
         end
 
         def tempfile!(id)

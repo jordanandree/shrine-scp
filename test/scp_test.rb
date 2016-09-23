@@ -22,6 +22,13 @@ describe Shrine::Storage::Scp do
       assert File.exist?("./tmp/uploads/foo.txt")
     end
 
+    it "should upload to prefix" do
+      FileUtils.mkdir_p(File.join(FileUtils.pwd, "tmp/uploads/sub"))
+      @storage.instance_variable_set "@prefix", "sub"
+      @storage.upload io, "foo.mp4"
+      assert File.exists?("./tmp/uploads/sub/foo.mp4")
+    end
+
     it "should set custom permissions" do
       @storage.instance_variable_set "@permissions", 0644
       @storage.upload io, "foo.rtf"
@@ -113,14 +120,15 @@ describe Shrine::Storage::Scp do
     end
 
     it "should return host and prefix with id" do
+      FileUtils.mkdir_p(File.join(FileUtils.pwd, "tmp/folder"))
       storage = Shrine::Storage::Scp.new(
         directory: directory,
         host: "http://example.com",
-        prefix: "bar",
+        prefix: "folder",
         options: ["-q"]
       )
       storage.upload io, "foo.tar.gz"
-      assert_equal storage.url("foo.tar.gz"), "http://example.com/bar/foo.tar.gz"
+      assert_equal storage.url("foo.tar.gz"), "http://example.com/folder/foo.tar.gz"
     end
   end
 end
