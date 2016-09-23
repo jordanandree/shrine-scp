@@ -90,6 +90,20 @@ describe Shrine::Storage::Scp do
     end
   end
 
+  describe "#clear!" do
+    before do
+      directory = File.join(FileUtils.pwd, "tmp/clear")
+      FileUtils.mkdir_p(directory)
+      @storage = Shrine::Storage::Scp.new(directory: directory)
+      @storage.upload io, "frodo"
+      @storage.clear!
+    end
+
+    it "removes all files" do
+      refute File.exist? "./tmp/clear/frodo"
+    end
+  end
+
   describe "#url" do
     it "should return id with minimal config" do
       storage = Shrine::Storage::Scp.new(directory: directory)

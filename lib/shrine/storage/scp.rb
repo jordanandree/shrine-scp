@@ -72,7 +72,8 @@ class Shrine
       end
 
       def clear!
-        # noop
+        file_path = File.join(directory, "*")
+        bash "rm -rf #{file_path} &> /dev/null;"
       end
 
       private
