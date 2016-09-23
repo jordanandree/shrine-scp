@@ -2,13 +2,14 @@ require "test_helper"
 require "ostruct"
 
 describe Shrine::Storage::Scp do
-  let(:directory) { File.join(FileUtils.pwd, "tmp/downloads") }
+  let(:directory) { File.join(FileUtils.pwd, "tmp") }
   let(:io) { FakeIO.new("file") }
+  let(:ssh) { "#{`whoami`.chomp}@127.0.0.1" }
 
   describe "#upload" do
     before do
       directory = File.join(FileUtils.pwd, "tmp/uploads")
-      @storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
+      @storage = Shrine::Storage::Scp.new(directory: directory)
     end
 
     it "saves io to tmp path" do
@@ -32,7 +33,7 @@ describe Shrine::Storage::Scp do
   describe "#download" do
     before do
       directory = File.join(FileUtils.pwd, "tmp/downloads")
-      storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
+      storage = Shrine::Storage::Scp.new(directory: directory)
       storage.upload io, "foo.mov"
       @tmp = storage.download "foo.mov"
     end
@@ -44,8 +45,7 @@ describe Shrine::Storage::Scp do
 
   describe "#open" do
     before do
-      directory = File.join(FileUtils.pwd, "tmp")
-      @storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
+      @storage = Shrine::Storage::Scp.new(directory: directory)
       @storage.upload io, "bar"
     end
 
@@ -54,9 +54,29 @@ describe Shrine::Storage::Scp do
     end
   end
 
+  describe "#exists?" do
+    it "returns true when file is local" do
+      @storage = Shrine::Storage::Scp.new(directory: directory)
+      @storage.upload io, "baz"
+      assert @storage.exists?("baz")
+    end
+
+    it "returns false if file does not exist" do
+      @storage = Shrine::Storage::Scp.new(directory: directory)
+      refute @storage.exists?("barf")
+    end
+
+    it "returns true when file is remote" do
+      skip("No remote testing on CI") if ENV["CI"]
+      @storage = Shrine::Storage::Scp.new(directory: directory, ssh_host: ssh)
+      @storage.upload io, "baz"
+      assert @storage.exists?("baz")
+    end
+  end
+
   describe "#url" do
     it "should return id with minimal config" do
-      storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
+      storage = Shrine::Storage::Scp.new(directory: directory)
       storage.upload io, "foo.bmp"
       assert_equal storage.url("foo.bmp"), "foo.bmp"
     end

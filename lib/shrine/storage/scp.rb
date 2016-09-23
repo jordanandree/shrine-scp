@@ -58,7 +58,8 @@ class Shrine
       end
 
       def exists?(id)
-        # noop
+        file_path = File.join(directory, id)
+        bash "ls -la #{file_path} &> /dev/null;"
       end
 
       def url(id, **_options)
@@ -74,6 +75,16 @@ class Shrine
       end
 
       private
+
+        def ssh?
+          ssh_host
+        end
+
+        def bash(sh)
+          command = "bash -c '#{sh}'"
+          command = "ssh #{ssh_host} \"#{command}\"" if ssh_host
+          system(command)
+        end
 
         def scp_up(id, tmp_path)
           FileUtils.chmod(permissions, tmp_path)
