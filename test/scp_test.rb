@@ -83,6 +83,7 @@ describe Shrine::Storage::Scp do
     end
 
     it "returns true when file is local" do
+      skip("No remote testing on CI") if ENV["CI"]
       @storage = Shrine::Storage::Scp.new(directory: directory, ssh_host: ssh)
       @storage.upload io, "gollum"
       assert @storage.delete("gollum")
