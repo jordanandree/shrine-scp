@@ -9,7 +9,7 @@ class Shrine
     class Scp
       attr_reader :directory, :ssh_host, :host, :prefix, :options, :permissions
 
-      def initialize(directory:, ssh_host: nil, host: nil, prefix: nil, options: [], permissions: 0600)
+      def initialize(directory:, ssh_host: nil, host: nil, prefix: nil, options: %w[-q], permissions: 0600)
         # Initializes a storage for uploading via scp.
         #
         # :directory
