@@ -16,8 +16,8 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "shrine", ">= 2.0"
+  spec.add_dependency "shrine", "~> 2.0"
 
-  spec.add_development_dependency "rake"
-  spec.add_development_dependency "minitest"
+  spec.add_development_dependency "rake", "~> 11.0"
+  spec.add_development_dependency "minitest", "~> 5.0"
 end
