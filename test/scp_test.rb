@@ -26,7 +26,7 @@ describe Shrine::Storage::Scp do
       FileUtils.mkdir_p(File.join(FileUtils.pwd, "tmp/uploads/sub"))
       @storage.instance_variable_set "@prefix", "sub"
       @storage.upload io, "foo.mp4"
-      assert File.exists?("./tmp/uploads/sub/foo.mp4")
+      assert File.exist?("./tmp/uploads/sub/foo.mp4")
     end
 
     it "should set custom permissions" do

@@ -82,9 +82,9 @@ class Shrine
         end
 
         def bash(sh)
-          command = "bash -c '#{sh}' &> /dev/null;"
+          command = "bash -c '#{sh}' &> /dev/null; echo $?"
           command = "ssh #{ssh_host} \"#{command}\"" if ssh_host
-          system(command)
+          `#{command}`.chomp == "0"
         end
 
         def scp_up(id, tmp_path)
