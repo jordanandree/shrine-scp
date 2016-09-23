@@ -82,7 +82,7 @@ class Shrine
         end
 
         def bash(sh)
-          command = "bash -c '#{sh}' &> /dev/null; echo $?"
+          command = "bash -c '#{sh}' > /dev/null 2>&1; echo $?"
           command = "ssh #{ssh_host} \"#{command}\"" if ssh_host
           `#{command}`.chomp == "0"
         end
