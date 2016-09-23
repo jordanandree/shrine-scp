@@ -30,12 +30,27 @@ describe Shrine::Storage::Scp do
   end
 
   describe "#download" do
-    it "downloads to tmp dir" do
+    before do
       directory = File.join(FileUtils.pwd, "tmp/downloads")
       storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
       storage.upload io, "foo.mov"
-      tmp = storage.download "foo.mov"
-      assert File.exist?(tmp.path)
+      @tmp = storage.download "foo.mov"
+    end
+
+    it "downloads to tmp dir" do
+      assert File.exist?(@tmp.path)
+    end
+  end
+
+  describe "#open" do
+    before do
+      directory = File.join(FileUtils.pwd, "tmp")
+      @storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
+      @storage.upload io, "bar"
+    end
+
+    it "returns a file handler" do
+      assert_equal @storage.open("bar").read, "file"
     end
   end
 

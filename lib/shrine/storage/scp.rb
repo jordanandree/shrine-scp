@@ -53,7 +53,8 @@ class Shrine
       end
 
       def open(id)
-        # noop
+        file = scp_down(id)
+        file.tap(&:open)
       end
 
       def exists?(id)
