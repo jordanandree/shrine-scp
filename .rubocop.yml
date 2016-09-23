@@ -38,9 +38,6 @@ Style/PercentLiteralDelimiters:
 Style/TrailingUnderscoreVariable:
   Enabled: false
 
-Style/NumericPredicate:
-  Enabled: false
-
 # Metrics
 Metrics/LineLength:
   Max: 90
