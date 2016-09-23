@@ -6,20 +6,20 @@ require "tempfile"
 
 class Shrine
   module Storage
-    class Rsync
+    class Scp
       PWD     = Pathname.new(File.expand_path("../../../../", __FILE__)).freeze
       TMP_DIR = PWD.join("tmp").freeze
 
       attr_reader :directory, :ssh_host, :host, :prefix, :options
 
       def initialize(directory:, ssh_host: nil, host: nil, prefix: nil, options: [])
-        # Initializes a storage for uploading via rsync.
+        # Initializes a storage for uploading via scp.
         #
         # :directory
         # :  the path where files will be transferred to
         #
         # :ssh_host
-        # :  optional user@hostname for remote rsync transfers over ssh
+        # :  optional user@hostname for remote scp transfers over ssh
         #
         # :host
         # :  URLs will by default be relative if `:prefix` is set, and you
@@ -30,8 +30,8 @@ class Shrine
         #    and it is included in the URL.
         #
         # :options
-        # :  Additional arguments specific to rsync
-        #    https://linux.die.net/man/1/rsync
+        # :  Additional arguments specific to scp
+        #    https://linux.die.net/man/1/scp
         @directory = directory.chomp(File::SEPARATOR)
         @prefix    = prefix.chomp(File::SEPARATOR) if prefix
         @host      = host.chomp(File::SEPARATOR) if host
@@ -43,13 +43,13 @@ class Shrine
 
       def upload(io, id, **)
         local_path = store_tmp(io, id)
-        rsync_up(local_path)
+        scp_up(local_path)
       end
 
       def download(id)
-        io = rsync_down(id)
+        io = scp_down(id)
 
-        tempfile = Tempfile.new(["rsync", File.extname(id)], binmode: true)
+        tempfile = Tempfile.new(["scp", File.extname(id)], binmode: true)
         IO.copy_stream(io, tempfile)
         tempfile.tap(&:open)
         tempfile
@@ -77,32 +77,32 @@ class Shrine
 
       private
 
-        def rsync_up(local_file_path)
-          rsync_transfer(source: local_file_path, destination: rsync_host)
+        def scp_up(local_file_path)
+          scp_transfer(source: local_file_path, destination: scp_host)
         end
 
-        def rsync_down(id)
-          source = File.join(rsync_host.chomp("/"), id)
+        def scp_down(id)
+          source = File.join(scp_host.chomp("/"), id)
 
-          tmp_path(id) if rsync_transfer(source: source, destination: tmp_path(id))
+          tmp_path(id) if scp_transfer(source: source, destination: tmp_path(id))
         end
 
-        def rsync_transfer(source:, destination:)
-          command = [rsync_bin, rsync_options, source, destination].join(" ")
+        def scp_transfer(source:, destination:)
+          command = [scp_bin, scp_options, source, destination].join(" ")
           system(command)
         end
 
-        def rsync_host
+        def scp_host
           ssh_host ? "#{ssh_host}:#{directory}" : directory
         end
 
-        def rsync_bin
-          rsync_bin = `which rsync`.chomp
-          raise "rsync could not be found." if rsync_bin.empty?
-          rsync_bin
+        def scp_bin
+          scp_bin = `which scp`.chomp
+          raise "scp could not be found." if scp_bin.empty?
+          scp_bin
         end
 
-        def rsync_options
+        def scp_options
           options.join(" ")
         end
 

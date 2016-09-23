@@ -1,13 +1,13 @@
-# Shrine::Rsync
+# Shrine::Scp
 
-Rsync storage plugin for Shrine attachment and upload toolkit
+Scp storage plugin for Shrine attachment and upload toolkit
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'shrine-rsync'
+gem 'shrine-scp'
 ```
 
 And then execute:
@@ -16,7 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install shrine-rsync
+    $ gem install shrine-scp
 
 ## Usage
 
@@ -28,7 +28,7 @@ After checking out the repo, run `bin/setup` to install dependencies. You can al
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/jordanandree/shrine-rsync.
+Bug reports and pull requests are welcome on GitHub at https://github.com/jordanandree/shrine-scp.
 
 
 ## License

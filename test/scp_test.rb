@@ -1,20 +1,20 @@
 require "test_helper"
 require "ostruct"
 
-describe Shrine::Storage::Rsync do
+describe Shrine::Storage::Scp do
   let(:directory) { File.join(FileUtils.pwd, "tmp/downloads") }
   let(:io) { FakeIO.new("file") }
 
   describe "#initialize" do
     it "should make the tmp dir" do
-      assert File.directory?(Shrine::Storage::Rsync::TMP_DIR)
+      assert File.directory?(Shrine::Storage::Scp::TMP_DIR)
     end
   end
 
   describe "#upload" do
     before do
       directory = File.join(FileUtils.pwd, "tmp/uploads")
-      storage = Shrine::Storage::Rsync.new(directory: directory, options: ["-q"])
+      storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
       storage.upload io, "foo"
     end
 
@@ -30,7 +30,7 @@ describe Shrine::Storage::Rsync do
   describe "#download" do
     it "downloads to tmp dir" do
       directory = File.join(FileUtils.pwd, "tmp/downloads")
-      storage = Shrine::Storage::Rsync.new(directory: directory, options: ["-q"])
+      storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
       storage.upload io, "foo"
       storage.download "foo"
       assert File.exist?("./tmp/foo")
@@ -39,13 +39,13 @@ describe Shrine::Storage::Rsync do
 
   describe "#url" do
     it "should return id with minimal config" do
-      storage = Shrine::Storage::Rsync.new(directory: directory, options: ["-q"])
+      storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
       storage.upload io, "foo"
       assert_equal storage.url("foo"), "foo"
     end
 
     it "should return host and prefix with id" do
-      storage = Shrine::Storage::Rsync.new(
+      storage = Shrine::Storage::Scp.new(
         directory: directory,
         host: "http://example.com",
         prefix: "bar",
