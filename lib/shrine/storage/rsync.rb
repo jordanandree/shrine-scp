@@ -32,9 +32,9 @@ class Shrine
         # :options
         # :  Additional arguments specific to rsync
         #    https://linux.die.net/man/1/rsync
-        @directory = directory
-        @prefix    = prefix
-        @host      = host
+        @directory = directory.chomp(File::SEPARATOR)
+        @prefix    = prefix.chomp(File::SEPARATOR) if prefix
+        @host      = host.chomp(File::SEPARATOR) if host
         @ssh_host  = ssh_host
         @options   = options
 
@@ -64,7 +64,7 @@ class Shrine
       end
 
       def url(id, **_options)
-        id
+        [host, prefix, id].compact.join(File::SEPARATOR)
       end
 
       def delete(id)
