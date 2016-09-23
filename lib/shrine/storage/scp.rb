@@ -7,9 +7,6 @@ require "tempfile"
 class Shrine
   module Storage
     class Scp
-      PWD     = Pathname.new(File.expand_path("../../../../", __FILE__)).freeze
-      TMP_DIR = PWD.join("tmp").freeze
-
       attr_reader :directory, :ssh_host, :host, :prefix, :options
 
       def initialize(directory:, ssh_host: nil, host: nil, prefix: nil, options: [])
@@ -33,26 +30,21 @@ class Shrine
         # :  Additional arguments specific to scp
         #    https://linux.die.net/man/1/scp
         @directory = directory.chomp(File::SEPARATOR)
-        @prefix    = prefix.chomp(File::SEPARATOR) if prefix
-        @host      = host.chomp(File::SEPARATOR) if host
         @ssh_host  = ssh_host
+        @host      = host.chomp(File::SEPARATOR) if host
+        @prefix    = prefix.chomp(File::SEPARATOR) if prefix
         @options   = options
-
-        FileUtils.mkdir_p(TMP_DIR.to_s) unless TMP_DIR.exist?
       end
 
       def upload(io, id, **)
-        local_path = store_tmp(io, id)
-        scp_up(local_path)
+        file = write_io(io, id)
+        scp_up(id, file.path)
+        file
       end
 
       def download(id)
-        io = scp_down(id)
-
-        tempfile = Tempfile.new(["scp", File.extname(id)], binmode: true)
-        IO.copy_stream(io, tempfile)
-        tempfile.tap(&:open)
-        tempfile
+        file = scp_down(id)
+        file
       end
 
       def open(id)
@@ -64,7 +56,7 @@ class Shrine
       end
 
       def url(id, **_options)
-        [host, prefix, id].compact.join(File::SEPARATOR)
+        File.join([host, prefix, id].compact)
       end
 
       def delete(id)
@@ -77,14 +69,15 @@ class Shrine
 
       private
 
-        def scp_up(local_file_path)
-          scp_transfer(source: local_file_path, destination: scp_host)
+        def scp_up(id, tmp_path)
+          scp_transfer(source: tmp_path, destination: File.join(scp_host, id))
         end
 
         def scp_down(id)
           source = File.join(scp_host.chomp("/"), id)
+          tmp = tempfile!(id)
 
-          tmp_path(id) if scp_transfer(source: source, destination: tmp_path(id))
+          tmp if scp_transfer(source: source, destination: tmp.path)
         end
 
         def scp_transfer(source:, destination:)
@@ -106,15 +99,15 @@ class Shrine
           options.join(" ")
         end
 
-        def store_tmp(io, id)
-          path = tmp_path(id)
-          IO.copy_stream(io, path)
-          path
+        def tempfile!(id)
+          Tempfile.new(["shrine-scp-", File.extname(id)], binmode: true)
         end
 
-        # Returns the tmp path to the file.
-        def tmp_path(id)
-          TMP_DIR.join(id.gsub("/", File::SEPARATOR))
+        def write_io(io, id)
+          tmp = tempfile!(id)
+          IO.copy_stream(io, tmp)
+          tmp.tap(&:open)
+          tmp
         end
     end
   end

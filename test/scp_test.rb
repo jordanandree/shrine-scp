@@ -5,25 +5,20 @@ describe Shrine::Storage::Scp do
   let(:directory) { File.join(FileUtils.pwd, "tmp/downloads") }
   let(:io) { FakeIO.new("file") }
 
-  describe "#initialize" do
-    it "should make the tmp dir" do
-      assert File.directory?(Shrine::Storage::Scp::TMP_DIR)
-    end
-  end
-
   describe "#upload" do
     before do
       directory = File.join(FileUtils.pwd, "tmp/uploads")
-      storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
-      storage.upload io, "foo"
+      @storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
     end
 
     it "saves io to tmp path" do
-      assert File.exist?("./tmp/foo")
+      tmp = @storage.upload io, "foo.png"
+      assert File.exist?(tmp.path)
     end
 
     it "copies to remote directory" do
-      assert File.exist?("./tmp/uploads/foo")
+      @storage.upload io, "foo.txt"
+      assert File.exist?("./tmp/uploads/foo.txt")
     end
   end
 
@@ -31,17 +26,17 @@ describe Shrine::Storage::Scp do
     it "downloads to tmp dir" do
       directory = File.join(FileUtils.pwd, "tmp/downloads")
       storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
-      storage.upload io, "foo"
-      storage.download "foo"
-      assert File.exist?("./tmp/foo")
+      storage.upload io, "foo.mov"
+      tmp = storage.download "foo.mov"
+      assert File.exist?(tmp.path)
     end
   end
 
   describe "#url" do
     it "should return id with minimal config" do
       storage = Shrine::Storage::Scp.new(directory: directory, options: ["-q"])
-      storage.upload io, "foo"
-      assert_equal storage.url("foo"), "foo"
+      storage.upload io, "foo.bmp"
+      assert_equal storage.url("foo.bmp"), "foo.bmp"
     end
 
     it "should return host and prefix with id" do
@@ -51,8 +46,8 @@ describe Shrine::Storage::Scp do
         prefix: "bar",
         options: ["-q"]
       )
-      storage.upload io, "foo"
-      assert_equal storage.url("foo"), "http://example.com/bar/foo"
+      storage.upload io, "foo.tar.gz"
+      assert_equal storage.url("foo.tar.gz"), "http://example.com/bar/foo.tar.gz"
     end
   end
 end
