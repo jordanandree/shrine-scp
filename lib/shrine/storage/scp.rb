@@ -59,7 +59,7 @@ class Shrine
 
       def exists?(id)
         file_path = File.join(directory, id)
-        bash "ls -la #{file_path} &> /dev/null;"
+        bash "ls -la #{file_path}"
       end
 
       def url(id, **_options)
@@ -68,12 +68,12 @@ class Shrine
 
       def delete(id)
         file_path = File.join(directory, id)
-        bash "rm -rf #{file_path} &> /dev/null;"
+        bash "rm -rf #{file_path}"
       end
 
       def clear!
         file_path = File.join(directory, "*")
-        bash "rm -rf #{file_path} &> /dev/null;"
+        bash "rm -rf #{file_path}"
       end
 
       private
@@ -83,7 +83,7 @@ class Shrine
         end
 
         def bash(sh)
-          command = "bash -c '#{sh}'"
+          command = "bash -c '#{sh}' &> /dev/null;"
           command = "ssh #{ssh_host} \"#{command}\"" if ssh_host
           system(command)
         end
