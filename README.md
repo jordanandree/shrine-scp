@@ -1,4 +1,6 @@
 # Shrine::Scp
+[![Build Status](https://travis-ci.org/jordanandree/shrine-scp.svg?branch=master)](https://travis-ci.org/jordanandree/shrine-scp)
+[![Dependency Status](https://gemnasium.com/badges/github.com/jordanandree/shrine-scp.svg)](https://gemnasium.com/github.com/jordanandree/shrine-scp)
 
 Scp storage plugin for Shrine attachment and upload toolkit
 
