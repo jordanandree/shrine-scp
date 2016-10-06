@@ -96,6 +96,7 @@ class Shrine
 
         def scp_down(id)
           source = path(id)
+          source = "#{ssh_host}:#{source}" if ssh_host
           tmp = tempfile!(id)
 
           tmp if scp_transfer(source: source, destination: tmp.path)
